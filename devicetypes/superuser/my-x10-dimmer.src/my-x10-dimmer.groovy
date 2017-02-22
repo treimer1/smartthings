@@ -39,7 +39,7 @@ metadata {
 	definition (name: "My X10 Dimmer", author: "todd@wackford.net") {
 		capability "Switch"
         capability "Switch Level"
-		attribute "stepsize", "string"
+//		attribute "stepsize", "number"
         command "levelUp"
 		command "levelDown"
 		command "dimmerOn"
@@ -89,12 +89,13 @@ metadata {
 
 
 def initialize() {
+    log.info "In initialize()"
 	if ( !settings.stepsize )
-    	state.stepsize = 10
+    	stepsize = 10
     else
-		state.stepsize = settings.stepsize
+		stepsize = settings.stepsize
     
-    log.info "state.stepsize = ${state.stepsize}"
+    log.info "stepsize = ${stepsize}"
     
     if (!device.currentValue("level"))
     	setLevel(40)
@@ -125,7 +126,7 @@ def on() {
         ]
     )
     log.info "on"
-    log.info "state.x10Code = " + state.x10Code
+//    log.info "state.x10Code = " + state.x10Code
     log.info "codeStr = " + codeStr
     sendEvent(name:"switch",value:"on")
     return result
@@ -142,16 +143,17 @@ def off() {
         ]
     )
     log.info "off"
-    log.info "state.x10Code = " + state.x10Code
+//    log.info "state.x10Code = " + state.x10Code
     log.info "codeStr = " + codeStr
     sendEvent(name:"switch",value:"off")
     return result
 }
 
 def setLevel(val){
-    log.info "setLevel $val"
-    log.info "Step Size: ${state.stepsize}"
+    log.info "setLevel ${val}"
+    log.info "Step Size: ${stepsize}"
     
+        
     // make sure we don't drive switches past allowed values (command will hang device waiting for it to
     // execute. Never commes back)
     if (val < 0){
@@ -190,28 +192,28 @@ def setLevel(val){
 }
 
 def levelUp(){
-	if ( !state.stepsize ) {
+    log.info "In levelUp()"
+	if ( !stepsize ) {
     	initialize()
         log.info "initialized on first up"
-    } else {
-    	state.stepsize = $stepsize
     }
     
-    def thisStep = state.stepsize as float
+    log.debug "stepsize" : stepsize
+    def thisStep = stepsize as float
     int nextLevel = device.currentValue("level") + thisStep
+    log.info "Calling setLevel ${nextLevel}"
     setLevel(nextLevel)
     log.info "level up $nextLevel"
 }
 
 def levelDown(){
-	if ( !state.stepsize ) {
+    log.info "In levelDown()"
+	if ( !stepsize ) {
     	initialize()
         log.info "initialized on first down"
-    } else {
-    	state.stepsize = $stepsize
     }
     
-    def thisStep = state.stepsize as float
+    def thisStep = stepsize as float
     int nextLevel = device.currentValue("level") - thisStep
     setLevel(nextLevel)
     log.info "level down $nextLevel"
