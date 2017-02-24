@@ -117,3 +117,7 @@ def panic() {
 def siren() {
     panic();
 }
+
+def both() {
+    panic();
+}
